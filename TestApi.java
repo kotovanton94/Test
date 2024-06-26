@@ -1,6 +1,7 @@
 package com.bifit.edo.autotest.kassa;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,12 +15,8 @@ public class TestApi {
      */
     @Test
     public void testSentenceHtml() {
-        var response = RestAssured.given()
-                .queryParam("type", "sentence")
-                .queryParam("number", "2")
-                .queryParam("format", "html")
-                .get("https://fish-text.ru/get");
-
+        // Выполянем запрос и получаем ответ
+        var response = request("sentence", 2, "html");
         // Подсчитываем количество знаков препинания
         var punctuationCount = response.asString().chars()
                 .filter(ch -> ch == '.' || ch == '!' || ch == '?')
@@ -35,11 +32,8 @@ public class TestApi {
      */
     @Test
     public void testParagraphHtml() {
-        var response = RestAssured.given()
-                .queryParam("type", "paragraph")
-                .queryParam("number", "2")
-                .queryParam("format", "html")
-                .get("https://fish-text.ru/get");
+        // Выполянем запрос и получаем ответ
+        var response = request("paragraph", 2, "html");
         // Разбиваем строку на количество абзацев
         String[] paragraph = response.asString().split("</p>");
         // Проверяем, что количество абзацев равно запрашеваемому
@@ -52,11 +46,8 @@ public class TestApi {
      */
     @Test
     public void testTitleHtml() {
-        var response = RestAssured.given()
-                .queryParam("type", "title")
-                .queryParam("number", "2")
-                .queryParam("format", "html")
-                .get("https://fish-text.ru/get");
+        // Выполянем запрос и получаем ответ
+        var response = request("title", 2, "html");
         // Разбиваем строку на количество заголовков
         String[] title = response.asString().split("</h1>");
         // Проверяем, что количество заголовков равно запрашеваемому
@@ -69,12 +60,8 @@ public class TestApi {
      */
     @Test
     public void testSentenceJson() {
-        var response = RestAssured.given()
-                .queryParam("type", "sentence")
-                .queryParam("number", "2")
-                .queryParam("format", "json")
-                .get("https://fish-text.ru/get");
-
+        // Выполянем запрос и получаем ответ
+        var response = request("sentence", 2, "json");
         // Подсчитываем количество знаков препинания
         var punctuationCount = response.asString().chars()
                 .filter(ch -> ch == '.' || ch == '!' || ch == '?')
@@ -90,11 +77,8 @@ public class TestApi {
      */
     @Test
     public void testParagraphJson() {
-        var response = RestAssured.given()
-                .queryParam("type", "paragraph")
-                .queryParam("number", "2")
-                .queryParam("format", "json")
-                .get("https://fish-text.ru/get");
+        // Выполянем запрос и получаем ответ
+        var response = request("paragraph", 2, "json");
         // Разбиваем строку на количество предложений
         String[] paragraph = response.asString().split("\\\\\\\\n\\\\\\\\n");
         // Проверяем, что количество абзацев равно запрашеваемому + 1 из-за особенностей подсчета
@@ -107,15 +91,28 @@ public class TestApi {
      */
     @Test
     public void testTitleJson() {
-        var response = RestAssured.given()
-                .queryParam("type", "title")
-                .queryParam("number", "2")
-                .queryParam("format", "json")
-                .get("https://fish-text.ru/get");
+        // Выполянем запрос и получаем ответ
+        var response = request("title", 2, "json");
         // Разбиваем строку на количество заголовков
         String[] title = response.asString().split("\\\\\\\\n\\\\\\\\n");
         // Проверяем, что количество абзацев равно запрашеваемому + 1 из-за особенностей подсчета
         assertEquals(response.statusCode(), 200);
         assertEquals(3, title.length, "Количество заголовков дожно быть запрашиваемому + 1");
+    }
+
+    /**
+     * Выполняем запрос с полученным параметрами
+     * @param type тип текста
+     * @param number количество текста
+     * @param format формат отввета
+     * @return текст
+     */
+    public Response request(String type, int number, String format) {
+        var response = RestAssured.given()
+                .queryParam("type", type)
+                .queryParam("number", number)
+                .queryParam("format", format)
+                .get("https://fish-text.ru/get");
+        return response;
     }
 }
